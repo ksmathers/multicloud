@@ -36,4 +36,7 @@ class LocalObject(Object):
         fullpath = self.fullpath()
         return open(fullpath, "r{'b' if binary else 't'}")
 
+    def exists(self) -> bool:
+        fullpath = self.fullpath()
+        return os.path.exists(fullpath)
 
