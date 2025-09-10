@@ -8,10 +8,13 @@ setup(name='multicloud',
       author='Kevin Smathers',
       author_email='kevin@ank.com',
       url='https://github.com/ksmathers/multicloud',
-      packages=['multicloud', 'multicloud.aws'],
+      packages=['multicloud', 'multicloud.aws', 'multicloud.backend', 'multicloud.backend.local', 'multicloud.common'],
       package_dir={
             'multicloud': 'multicloud',
-            'multicloud.aws': 'multicloud_aws'
+            'multicloud.aws': 'multicloud/aws'
+      },
+      extras_require={
+            'aws': ['boto3'],
       },
       install_requires=[]
      )

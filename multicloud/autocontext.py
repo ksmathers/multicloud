@@ -7,7 +7,7 @@ from .backend.secret import Secret
 
 
 class Context:
-    def __init__(self, service="default", config=None):
+    def __init__(self, service="default", config=None, password="changeit"):
         """
         Reads service descriptions from a $HOME/.jaws and instantiates one of the services
 
@@ -41,7 +41,7 @@ class Context:
         self.environment = create_environment(self, config_group.get("environment"))
         self.network = create_network(self, config_group.get("network"))
         self.backend = create_backend(self, config_group.get("backend"))
-
+        self.bootstrap_password = os.environ.get("MULTICLOUD_BOOTSTRAP_PASSWORD", None)
 
     def object(self, key:str) -> Object:
         return self.backend.object(key)

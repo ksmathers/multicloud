@@ -4,16 +4,35 @@ from .local_object import LocalObject
 from ..secret import Secret
 from ..object import Object
 from ...errors import ConfigurationError
+from typing import Optional
 
 class LocalBackend(Backend):
-    def __init__(self, ctx, basedir):
+    def __init__(self, ctx, basedir, keyring : Optional[str] = None):
+        """A local filesystem based backend
+        
+        Args:
+            ctx : Context : The context this backend is part of
+            basedir : str : The base directory to store objects in
+            keyring : Optional[str] : The keyring backend to use for secrets, e.g. "fernet", default None uses the system keyring
+        """
         super().__init__(ctx, "LocalBackend")
         self.basedir = basedir
+        self.keyring = keyring
 
     def secret(self, name) -> Secret:
-        return LocalSecret(self.ctx, name)
-    
+        """Returns an abstraction to access a secret stored in the local keyring
+
+        Args:
+            name : str : The name of the secret to access
+        """
+        return LocalSecret(self.ctx, name, self.keyring)
+
     def object(self, key) -> Object:
+        """Returns an abstraction to access an object stored in the local filesystem
+        
+        Args:
+            key : str : The key of the object to access
+        """
         if self.basedir is None:
             raise ConfigurationError("object service requires the 'basedir' configuration setting")
         return LocalObject(self.ctx, key, self.basedir)

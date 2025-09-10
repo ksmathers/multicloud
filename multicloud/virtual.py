@@ -30,7 +30,7 @@ def create_backend(ctx, backend_config : dict) -> Backend:
         return TinyBackend(ctx)
     elif backend_config['type'] == 'local':
         from .backend.local.local_backend import LocalBackend
-        return LocalBackend(ctx, backend_config.get('basedir'))
+        return LocalBackend(ctx, backend_config.get('basedir'), backend=backend_config.get('keyring'))
     elif backend_config['type'] == 'nas':
         from .backend.nas.nas_backend import NasBackend
         return NasBackend(ctx, backend_config['server'], backend_config['port'], backend_config['secret'])
