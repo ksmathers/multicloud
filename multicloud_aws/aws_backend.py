@@ -3,7 +3,7 @@ from multicloud.backend import Backend
 from multicloud.backend.secret import Secret
 from multicloud.backend.object import Object
 from .aws_secret import AwsSecret
-from .aws_object import AwsObject
+from ..multicloud.aws.aws_object import AwsObject
 from .aws_options import AwsOptions
 import boto3
 

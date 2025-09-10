@@ -2,7 +2,7 @@ import os
 from io import IOBase
 from ..object import Object
 from ...autocontext import Context
-from .aws_options import AwsOptions
+from ...multicloud_aws.aws_options import AwsOptions
 
 class AwsObject(Object):
     options = AwsOptions

@@ -21,16 +21,79 @@ Implementation specifics:
 Multiple services can be mixed together from various sources all within the same configuration file.  The configuration associates a symbolic name
 for the service with one or more service backends, all within the same YAML config file:
 
-    <servicename>:
-        environment:
-            <ENVVAR>: <value>
-            ...
-        network:
-            cacerts: <optional-root-ssl-certificate-bundle-file>
-        backend:
-            type: [local|aws|tiny|nas]
-            basedir: <base-directory-for-local>
-            server: <server-hostname-for-nas>
-            port: <webdav-port>
-            bucket: <bucket-name-for-aws>
+```yaml
+<servicename>:
+    environment:
+        <ENVVAR>: <value>
+        ...
+    network:
+        cacerts: <optional-root-ssl-certificate-bundle-file>
+    backend:
+        type: [local|aws|tiny|nas]
+        basedir: <base-directory-for-local>
+        server: <server-hostname-for-nas>
+        port: <webdav-port>
+        bucket: <bucket-name-for-aws>
+        keyring: [fernet|None]
+```
+
+# Synopsis
+
+```python
+import multicloud
+mc = multicloud.Context() # initializes the 'default' service
+mc_local = multicloud.Context('local') # Initializes the 'local' service
+mc_portable_secrets = multicloud.Context(
+  password='changeit',
+  config={
+    'default':{
+      'backend':{
+        'type':'local', 
+        'keyring':'fernet'
+      }}}    
+  )
+
+# object storage
+obj = mc.object('path/to/object')
+obj.put_text('this is some content')
+
+# secret storage
+sec = mc.secret('secret_name')
+key = os.urandom(16)
+sec.set({'key': key.hex()})
+restored_key = bytes.fromhex(sec.get()['key'])
+```
+
+# Examples
+
+Local Secret Service using fernet_keyring.  Password can optionally come from the shell environment instead by removing the 'environment' section.   Alternatively the bootstrap password can be supplied when the multicloud Context is instantiated.
+
+```yaml
+portable_secrets:
+  environment:
+    MULTICLOUD_BOOTSTRAP_PASSWORD: changeit
+  backend:
+    type: local
+    keyring: fernet
+```
+
+Local Secret Service using system keyring.  Password is from the system dialog box if not preauthorized.
+
+```yaml
+system_secrets:
+  backend:
+    type: local
+```
+
+Local Secret Service and Object Store
+
+```yaml
+local:
+  backend:
+    type: local
+    basedir: ~/.multicloud/objects
+```
+
+
+
 

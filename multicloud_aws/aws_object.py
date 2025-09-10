@@ -1,19 +1,22 @@
 from io import IOBase, BytesIO
-from ..object import Object
-from ...autocontext import Context
+from multicloud.backend.object import Object
+from multicloud.autocontext import Context
 from .aws_options import AwsOptions
 
+from typing import Callable
+
 class ObjectIO(BytesIO):
-    def __init__(self, object, *args, **kwargs):
+    def __init__(self, object_write : Callable[[bytes], None], *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.object = object
+        self.object_write = object_write
 
     def close(self):
-        object.put_bytes(self.getvalue())
+        self.object_write(self.getvalue())
         super().close()
 
 class AwsObject(Object):
     options = AwsOptions
+
 
     def __init__(self, ctx:Context, key:str, bucket:str, client):
         super().__init__(ctx, key)
@@ -31,7 +34,7 @@ class AwsObject(Object):
         )
 
     def put_file(self, binary:bool = True) -> IOBase:
-        ios = ObjectIO(self)
+        ios = ObjectIO(self.put_bytes)
         return ios
 
     def get_bytes(self):

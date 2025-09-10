@@ -23,7 +23,7 @@ def create_backend(ctx, backend_config : dict) -> Backend:
     if backend_config['type'] == 'aws':
         my_backend = __import__(f".backend.aws.{backend_config['type']}_backend")
         my_backend.create_backend(ctx, backend_config)
-        from .backend.aws.aws_backend import AwsBackend
+        from multicloud_aws.aws_backend import AwsBackend
         return AwsBackend(ctx, backend_config['creds'])
     elif backend_config['type'] == 'tinyserver':
         from .backend.tiny.tiny_backend import TinyBackend
