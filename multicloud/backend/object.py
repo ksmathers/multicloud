@@ -8,8 +8,9 @@ class Object:
           ctx :Context:
           key :str: an object key has pathlike syntax (a/b/c), but must not start with a '/'
         """
+        from ..autocontext import Context
         assert(not key.startswith('/'))
-        self.ctx = ctx
+        self.ctx : Context = ctx
         self.key = key
 
     def prepare(self, fullpath):
@@ -36,7 +37,9 @@ class Object:
         self.put_bytes(value.encode())
 
     def get_textfile(self) -> TextIOBase:
-        return self.get_file(binary=False)
+        iob = self.get_file(binary=False)
+        assert(isinstance(iob, TextIOBase))
+        return iob
 
     def exists(self) -> bool:
         raise NotImplementedError("base class")

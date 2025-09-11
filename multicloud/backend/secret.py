@@ -1,6 +1,9 @@
+
+
 class Secret:
     def __init__(self, ctx, name : str):
-        self.ctx = ctx
+        from ..autocontext import Context
+        self.ctx : Context = ctx
         self.name = name
 
     def __repr__(self):
