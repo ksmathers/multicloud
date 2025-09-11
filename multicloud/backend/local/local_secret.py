@@ -22,10 +22,10 @@ class LocalSecret(Secret):
         super().__init__(ctx, name)
         if backend_type is not None and backend_type == "fernet":
             from .fernet_keyring import FernetKeyring
-            assert(ctx.bootstrap_password is not None), "Fernet keyring requires a bootstrap password"
+            assert ("MULTICLOUD_BOOTSTRAP_PASSWORD" in ctx.environment), "Fernet keyring requires a bootstrap password"
             if keyring_path is None:
                 keyring_path = "fernet-keyring.json"
-            local_backend = FernetKeyring(ctx.bootstrap_password, keyring_path)
+            local_backend = FernetKeyring(ctx.environment["MULTICLOUD_BOOTSTRAP_PASSWORD"], keyring_path)
             local_backend.activate()
 
     def get(self) -> dict:

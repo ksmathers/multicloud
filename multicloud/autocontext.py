@@ -4,10 +4,11 @@ import yaml
 from .virtual import create_backend, create_network, create_environment
 from .backend.object import Object
 from .backend.secret import Secret
+from typing import Optional
 
 
 class Context:
-    def __init__(self, service="default", config=None, password=None):
+    def __init__(self, service="default", config=None, password=None, credentials: Optional[Secret] = None):
         """
         Reads service descriptions from a $HOME/.jaws and instantiates one of the services
 
@@ -39,10 +40,13 @@ class Context:
                 config = yaml.load(f.read(), yaml.loader.SafeLoader)
         config_group = config.get(service)
         self.service = service
+        self.credentials = credentials
         self.environment = create_environment(self, config_group.get("environment"))
+        #self.bootstrap_password = self.environment.getenv("MULTICLOUD_BOOTSTRAP_PASSWORD", password)
         self.network = create_network(self, config_group.get("network"))
         self.backend = create_backend(self, config_group.get("backend"))
-        self.bootstrap_password = self.environment.getenv("MULTICLOUD_BOOTSTRAP_PASSWORD", password)
+        
+
 
     def object(self, key:str) -> Object:
         return self.backend.object(key)

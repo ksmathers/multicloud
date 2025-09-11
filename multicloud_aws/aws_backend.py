@@ -3,7 +3,7 @@ from multicloud.backend import Backend
 from multicloud.backend.secret import Secret
 from multicloud.backend.object import Object
 from .aws_secret import AwsSecret
-from ..multicloud.aws.aws_object import AwsObject
+from .aws_object import AwsObject
 from .aws_options import AwsOptions
 import boto3
 
@@ -12,14 +12,20 @@ class AwsBackend(Backend):
         super().__init__(ctx, "LocalBackend")
         self.bucket = options.bucket
         self.region = options.region
-        self.session = boto3.session.Session()
+        assert(ctx.credentials is not None, "AWS Backend requires credentials to be provided in the context")
+        creds = ctx.credentials.get()
+        self.session = boto3.session.Session( 
+            aws_access_key_id=creds['access_id'], 
+            aws_secret_access_key=creds['secret_key'], 
+            aws_session_token=creds.get('session_token', None)
+        )
 
     def secret(self, name) -> Secret:
         client = self.session.client(
             service_name='secretsmanager',
             region_name=self.region
         )
-        return AwsSecret(self.ctx, self.session, name, client)
+        return AwsSecret(self.ctx, name, client)
 
     def object(self, key) -> Object:
         client = self.session.client(

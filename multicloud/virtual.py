@@ -2,7 +2,9 @@ from .common.runtime import Runtime, detect_runtime
 from .backend import Backend
 from .common.network import Network
 from .common.environment import Environment
+from .backend.secret import Secret
 import os
+from typing import Optional
 
 
 def create_backend(ctx, backend_config : dict) -> Backend:
@@ -21,10 +23,12 @@ def create_backend(ctx, backend_config : dict) -> Backend:
 
     assert('type' in backend_config)
     if backend_config['type'] == 'aws':
-        my_backend = __import__(f".backend.aws.{backend_config['type']}_backend")
-        my_backend.create_backend(ctx, backend_config)
+        #my_backend = __import__(f"multicloud.aws.{backend_config['type']}_backend")
+        #my_backend.create_backend(ctx, backend_config)
         from multicloud_aws.aws_backend import AwsBackend
-        return AwsBackend(ctx, backend_config['creds'])
+        from multicloud_aws.aws_options import AwsOptions
+        options = AwsOptions(backend_config)
+        return AwsBackend(ctx, options)
     elif backend_config['type'] == 'tinyserver':
         from .backend.tiny.tiny_backend import TinyBackend
         return TinyBackend(ctx)

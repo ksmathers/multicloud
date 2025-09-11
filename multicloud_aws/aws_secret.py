@@ -1,7 +1,7 @@
 import os
 import json
 from keyring import get_password, set_password
-from ..secret import Secret
+from multicloud.backend.secret import Secret
 import boto3
 import sys
 from botocore.exceptions import ClientError
@@ -25,7 +25,11 @@ class AwsSecret(Secret):
             raise ValueError(f"Unable to get AWS secret {self.name}")
     
     def set(self, value : dict):
-        """Stores localhost secrets into keyring"""
-        set_password(self.ctx.service, self.name, json.dumps(value))
+        """Stores AWS secrets"""
+        try:
+            self.client.put_secret_value(SecretId=self.name, SecretString=json.dumps(value))
+        except ClientError as e:
+            print("ERROR: Unable to set secret {self.name}", file=sys.stderr)
+            raise ValueError(f"Unable to set AWS secret {self.name}")
     
 
