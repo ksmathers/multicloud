@@ -94,6 +94,37 @@ local:
     basedir: ~/.multicloud/objects
 ```
 
+AWS Secret and Object Service with AWS Credentials in keyring 
 
+```yaml
+multicloud:
+  backend:
+    type: local
+aws:
+  backend:
+    type: aws
+    Bucket: my-bucket-name
+    Region: us-west-2
+```
+
+Using keyring, setup the AWS credentials as follows:
+
+```bash
+$ keyring set multicloud aws <<!
+>>> { "access_id": "<aws-access-id>", "secret_key": "<aws-secret-key>" }
+>>> !
+```
+
+The AWS context can be initialized by providing a local secret to the AWS Context from which to load the AWS credentials:
+
+```python
+mc_multi = multicloud.Context("multicloud")
+creds = mc_multi.secret("aws")
+mc_aws = multicloud.Context("aws", credentials=creds)
+```
+
+At that point the 'mc_aws' context can be used to create handles to read and write objects or secrets, but neither the object bucket
+nor the secrets are automatically provisioned.   Those must be instantiated separately using your tool of choice, after which multicloud
+will read and write to the contents.
 
 
