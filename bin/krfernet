@@ -1,0 +1,53 @@
+#!python
+
+import keyring
+from multicloud.backend.local.local_secret import LocalSecret
+from multicloud.autocontext import Context
+import argparse
+
+def open_keyring(password):
+    password = ""
+    ctx = Context(config={
+        "default": {
+            "environment": {
+                
+            }
+            "backend": {
+                "type": "local",
+                "keyring": "fernet",
+                "keyring_path": "./fernet-keyring.json",
+                "keyring_password": "env.KEYRING_PASSWORD"
+            }
+        }
+    }, password=password)
+    return ctx
+
+
+if __name__ == "__main__":
+    import json
+    import os
+    password = os.getenv("KEYRING_PASSWORD", "hello.c")
+    parser = argparse.ArgumentParser(description="Manage fernet keyring")
+    parser.add_argument("-p", "--password", help="master password", default=password)
+    parser.add_argument("cmd", help="command to execute (e.g. get, set)")
+    parser.add_argument("secret_name", help="name of the secret")
+    parser.add_argument("secret_value", help="value of the secret", nargs='?', default=None)
+    args = parser.parse_args()
+
+
+    ctx = open_keyring(args.password)
+    secret = ctx.secret(args.secret_name)
+    if args.cmd == "get":
+        print(json.dumps(secret.get()))
+    elif args.cmd == "set":
+        if args.secret_value is None:
+            print("Secret value is required for 'set' command")
+            exit(1)
+        try:
+            secret.set(json.loads(args.secret_value))
+        except json.JSONDecodeError:
+            print("Invalid JSON for secret value")
+
+    # placeholder for actual command handling
+    print(args.cmd, args.secret_name, args.secret_value)
+

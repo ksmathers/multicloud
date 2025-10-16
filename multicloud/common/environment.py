@@ -1,9 +1,10 @@
 from copy import copy
+import os
 
 class Environment:
     def __init__(self, ctx, environment : dict):
         self.ctx = ctx
-        if environment:
+        if environment is not None:
             self._environ = copy(environment)
         else:
             raise ValueError(f"Unknown environment config: {environment}")
@@ -12,7 +13,8 @@ class Environment:
         return f"Environment<{self.getenv('ENV','dev')}>"
     
     def getenv(self, varname, default=None):
-        return self._environ.get(varname, default)
+        # First check in the provided environment, then fallback to os.environ
+        return self._environ.get(varname, os.environ.get(varname, default))
     
     def interpolate(self, sval):
         environ = self._environ

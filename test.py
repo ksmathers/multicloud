@@ -18,6 +18,6 @@ creds = mc_multi.secret("aws")
 mc_default = multicloud.Context(config=config, credentials=creds)
 ksecret = mc_default.secret('myname')
 
-ksecret.set({"name": "Kevin Smathers"})
+#ksecret.set({"name": "Kevin Smathers"})
 
 print(ksecret.get())

@@ -39,14 +39,13 @@ class Context:
             with open(os.path.expanduser("~/.jaws"), "rt") as f:
                 config = yaml.load(f.read(), yaml.loader.SafeLoader)
         config_group = config.get(service)
+        assert config_group is not None, f"Service '{service}' not found in config"
         self.service = service
         self.credentials = credentials
-        self.environment = create_environment(self, config_group.get("environment"))
+        self.environment = create_environment(self, config_group.get("environment", {}))
         #self.bootstrap_password = self.environment.getenv("MULTICLOUD_BOOTSTRAP_PASSWORD", password)
         self.network = create_network(self, config_group.get("network"))
         self.backend = create_backend(self, config_group.get("backend"))
-        
-
 
     def object(self, key:str) -> Object:
         return self.backend.object(key)

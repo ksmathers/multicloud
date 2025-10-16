@@ -30,14 +30,15 @@ for the service with one or more service backends, all within the same YAML conf
         cacerts: <optional-root-ssl-certificate-bundle-file>
     backend:
         type: [local|aws|tiny|nas]
-        basedir: <base-directory-for-local>
-        server: <server-hostname-for-nas>
-        port: <webdav-port>
-        bucket: <bucket-name-for-aws>
-        keyring: [fernet|None]
+        ...backend specific key value pairs...
 ```
 
+The environment section of the config file takes precedence over the system environment variables when looking up a value, so environment 
+settings can be written to either location.  In the examples below we use the `yaml` file to set environment variables to keep the examples
+cohesive.
+
 # Synopsis
+
 
 ```python
 import multicloud
