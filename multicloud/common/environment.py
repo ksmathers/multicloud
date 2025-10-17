@@ -1,5 +1,6 @@
 from copy import copy
 import os
+import re
 
 class Environment:
     def __init__(self, ctx, environment : dict):
@@ -18,6 +19,20 @@ class Environment:
     
     def interpolate(self, sval):
         environ = self._environ
-        for var in self._environ:
-            sval = sval.replace(f"%{var}%", self._environ[var])
+        pattern = re.compile(r"\${(\w+)\.(\w+)}")
+        while True:
+            match = pattern.search(sval)
+            if not match:
+                break
+            sys = match.group(1)
+            var = match.group(2)
+            text = match.group(0)
+            if sys == "env":
+                sval = sval.replace(text, environ.get(var, ""))
+            elif sys == "secret":
+                var, attr = (var.split('.', 1) + [None])[:2]
+                secret = self.ctx.secret(var)
+                sval = sval.replace(text, secret.get(var, {}).get(attr, ""))
+            else:
+                raise ValueError(f"Unknown interpolation system '{sys}' in '{sval}'")
         return sval

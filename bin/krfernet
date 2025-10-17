@@ -6,20 +6,19 @@ from multicloud.autocontext import Context
 import argparse
 
 def open_keyring(password):
-    password = ""
-    ctx = Context(config={
-        "default": {
+    ctx = Context("fernet", config={
+        "fernet": {
             "environment": {
-                
-            }
+                "KEYRING_PASSWORD": password
+            },
             "backend": {
                 "type": "local",
                 "keyring": "fernet",
                 "keyring_path": "./fernet-keyring.json",
-                "keyring_password": "env.KEYRING_PASSWORD"
+                "keyring_password": "${env.KEYRING_PASSWORD}"
             }
         }
-    }, password=password)
+    })
     return ctx
 
 
