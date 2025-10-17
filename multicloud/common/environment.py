@@ -1,9 +1,10 @@
 from copy import copy
 import os
 import re
+#from ..autocontext import Context
 
 class Environment:
-    def __init__(self, ctx, environment : dict):
+    def __init__(self, ctx : 'Context', environment : dict):
         self.ctx = ctx
         if environment is not None:
             self._environ = copy(environment)
@@ -24,15 +25,11 @@ class Environment:
             match = pattern.search(sval)
             if not match:
                 break
+            text = match.group(0)
             sys = match.group(1)
             var = match.group(2)
-            text = match.group(0)
             if sys == "env":
-                sval = sval.replace(text, environ.get(var, ""))
-            elif sys == "secret":
-                var, attr = (var.split('.', 1) + [None])[:2]
-                secret = self.ctx.secret(var)
-                sval = sval.replace(text, secret.get(var, {}).get(attr, ""))
+                sval = sval.replace(text, self.getenv(var, ""))
             else:
                 raise ValueError(f"Unknown interpolation system '{sys}' in '{sval}'")
         return sval

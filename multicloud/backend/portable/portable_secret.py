@@ -1,6 +1,6 @@
 import os
 import json
-import keyring
+from keyring.backend import KeyringBackend
 from ..secret import Secret
 from ...autocontext import Context
 from typing import Optional
@@ -11,28 +11,21 @@ class PortableSecret(Secret):
     """Fetches secrets automatically by redirecting the secret request to the 
     appropriate service based on the detected runtime environment"""
 
-    def __init__(self, ctx : Context, name : str, backend_type : Optional[str] = None, keyring_path : Optional[str] = None):
+    def __init__(self, ctx : Context, name : str, keyring_backend : KeyringBackend):
         """Initializes a local secret access object
         Args:
             ctx : Context : The context this secret is part of
             name : str : The name of the secret to access
-            backend_type : Optional[str] : The keyring backend to use for secrets, e.g. "fernet", default None uses the system keyring
-            keyring_path : Optional[str] : The file to use for file-based keyrings, e.g. for "fernet" backends, default None uses the default location
         """
+        #print("Initializing PortableSecret for", name)
         super().__init__(ctx, name)
-        if backend_type is not None and backend_type == "fernet":
-            from .fernet_keyring import FernetKeyring
-            fernet_password = ctx.environment.getenv("FERNET_PASSWORD")
-            assert fernet_password is not None, "Fernet keyring must set FERNET_PASSWORD environment variable."
-            if keyring_path is None:
-                keyring_path = "fernet-keyring.json"
-            local_backend = FernetKeyring(fernet_password, keyring_path)
-            local_backend.activate()
+        self.keyring_backend = keyring_backend
 
     def get(self) -> dict:
         """Fetches localhost secrets from keyring"""
+        #print("PortableSecret.get called")
         try:
-            pw = keyring.get_password(self.ctx.service, self.name)
+            pw = self.keyring_backend.get_password(self.ctx.service, self.name)
             if pw is None:
                 raise KeyError(f"Secret '{self.name}' not found in keyring for service '{self.ctx.service}'")
             return json.loads(pw)
@@ -41,6 +34,7 @@ class PortableSecret(Secret):
 
     def set(self, value : dict):
         """Stores localhost secrets into keyring"""
-        keyring.set_password(self.ctx.service, self.name, json.dumps(value))
+        #print("PortableSecret.set called")
+        self.keyring_backend.set_password(self.ctx.service, self.name, json.dumps(value))
 
 

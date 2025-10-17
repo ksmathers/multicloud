@@ -1,16 +1,15 @@
 import os
 import certifi
+from ..common.config import Config
+#from ..autocontext import Context
 
 class Network:
 
-    def __init__(self, ctx, network_config : dict):
+    def __init__(self, ctx : 'Context', network_config : Config):
         self.ctx = ctx
         self.cacerts = certifi.where()
-        self.verify = network_config.get('verify', True)
-        if network_config and 'cacerts' in network_config:
-            self.cacerts = os.path.expanduser(network_config['cacerts'])
-        else:
-            self.cacerts = certifi.where()
+        self.verify = network_config.get_value(ctx, 'verify', True)
+        self.cacerts = network_config.get_value(ctx, 'cacerts', certifi.where())
 
     def __repr__(self):
         return f'Network<{self.cacerts}>'

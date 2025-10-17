@@ -37,21 +37,31 @@ The environment section of the config file takes precedence over the system envi
 settings can be written to either location.  In the examples below we use the `yaml` file to set environment variables to keep the examples
 cohesive.
 
+The network section is used to override standard networking settings.  Currently the only option is `cacerts` which can be used to override
+the certificate bundle used to authenticate HTTPS connections.  You would point it at your private self-signed root certificate when talking 
+to private services.
+
+The backend section includes options for configuring the `secrets` and `object` services so that a multicloud context can instantiate those
+service handles correctly.   
+
 # Synopsis
 
 
 ```python
 import multicloud
-mc = multicloud.Context() # initializes the 'default' service
-mc_local = multicloud.Context('local') # Initializes the 'local' service
-mc_portable_secrets = multicloud.Context(
-  password='changeit',
-  config={
-    'default':{
-      'backend':{
-        'type':'local'
-      }}}    
-  )
+cfg = multicloud.Config.from_yaml("""
+  default:
+    backend:
+      type: local
+  fernet:
+    environment:
+      FERNET_PASSWORD: changeit
+    backend:
+      type: portable
+""")
+mc = multicloud.Context(config=cfg) # initializes the 'default' service
+mc_local = multicloud.Context('local', cfg) # Initializes the 'local' service
+mc_portable_secrets = multicloud.Context('fernet', cfg)
 
 # object storage
 obj = mc.object('path/to/object')
@@ -111,7 +121,7 @@ is automatically created as needed.  To use local object storage you will need t
 local:
   backend:
     type: local
-    basedir: ${env.HOME}/.multicloud/objects
+    basedir: ${env:HOME}/.multicloud/objects
 ```
 
 ## NAS Services

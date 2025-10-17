@@ -12,13 +12,19 @@ setup(name='multicloud',
           'multicloud', 
           'multicloud_aws', 
           'multicloud.backend', 
-          'multicloud.backend.local', 
+          'multicloud.backend.local',
+          'multicloud.backend.portable',
+          'multicloud.backend.nas',
+          'multicloud.backend.tiny',
           'multicloud.common'
       ],
       package_dir={
             'multicloud': 'multicloud',
             'multicloud_aws': 'multicloud_aws'
       },
+      scripts=[
+          'bin/krfernet'
+      ],
       extras_require={
             'aws': ['boto3'],
       },

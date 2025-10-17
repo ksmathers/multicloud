@@ -1,21 +1,23 @@
 #!python
 
+import sys
 import keyring
 from multicloud.backend.local.local_secret import LocalSecret
 from multicloud.autocontext import Context
 import argparse
 
-def open_keyring(password):
+def open_keyring(password, keyring_file=None):
+    if not keyring_file:
+        keyring_file = "./fernet-keyring.json"
     ctx = Context("fernet", config={
         "fernet": {
             "environment": {
                 "KEYRING_PASSWORD": password
             },
             "backend": {
-                "type": "local",
-                "keyring": "fernet",
-                "keyring_path": "./fernet-keyring.json",
-                "keyring_password": "${env.KEYRING_PASSWORD}"
+                "type": "portable",
+                "keyring_path": keyring_file,
+                "fernet_password": "${env.KEYRING_PASSWORD}"
             }
         }
     })
@@ -28,25 +30,27 @@ if __name__ == "__main__":
     password = os.getenv("KEYRING_PASSWORD", "hello.c")
     parser = argparse.ArgumentParser(description="Manage fernet keyring")
     parser.add_argument("-p", "--password", help="master password", default=password)
+    parser.add_argument("-k", "--keyring-file", help="keyring file", default=None)
     parser.add_argument("cmd", help="command to execute (e.g. get, set)")
     parser.add_argument("secret_name", help="name of the secret")
-    parser.add_argument("secret_value", help="value of the secret", nargs='?', default=None)
+    parser.add_argument("secret_value", help="JSON secret value", nargs='?', default=None)
     args = parser.parse_args()
 
 
-    ctx = open_keyring(args.password)
+    ctx = open_keyring(args.password, args.keyring_file)
     secret = ctx.secret(args.secret_name)
     if args.cmd == "get":
         print(json.dumps(secret.get()))
     elif args.cmd == "set":
         if args.secret_value is None:
-            print("Secret value is required for 'set' command")
-            exit(1)
+            args.secret_value = sys.stdin.read()
         try:
             secret.set(json.loads(args.secret_value))
         except json.JSONDecodeError:
             print("Invalid JSON for secret value")
+    else:
+        print(f"Unknown command '{args.cmd}'")
 
     # placeholder for actual command handling
-    print(args.cmd, args.secret_name, args.secret_value)
+    #print(args.cmd, args.secret_name, args.secret_value)
 

@@ -11,7 +11,7 @@ class LocalSecret(Secret):
     """Fetches secrets automatically by redirecting the secret request to the 
     appropriate service based on the detected runtime environment"""
 
-    def __init__(self, ctx : Context, name : str, backend_type : Optional[str] = None, keyring_path : Optional[str] = None):
+    def __init__(self, ctx : Context, name : str):
         """Initializes a local secret access object
         Args:
             ctx : Context : The context this secret is part of
@@ -20,13 +20,7 @@ class LocalSecret(Secret):
             keyring_path : Optional[str] : The file to use for file-based keyrings, e.g. for "fernet" backends, default None uses the default location
         """
         super().__init__(ctx, name)
-        if backend_type is not None and backend_type == "fernet":
-            from .fernet_keyring import FernetKeyring
-            assert ("MULTICLOUD_BOOTSTRAP_PASSWORD" in ctx.environment), "Fernet keyring requires a bootstrap password"
-            if keyring_path is None:
-                keyring_path = "fernet-keyring.json"
-            local_backend = FernetKeyring(ctx.environment["MULTICLOUD_BOOTSTRAP_PASSWORD"], keyring_path)
-            local_backend.activate()
+        keyring_impl = keyring.get_keyring()
 
     def get(self) -> dict:
         """Fetches localhost secrets from keyring"""
