@@ -10,7 +10,7 @@ class FernetKeyring(KeyringBackend):
     def __init__(self, password, keystore_path="fernet-keyring.json"):
         #print("Initializing FernetKeyring with keystore:", keystore_path)
         self.keystore_path = keystore_path
-        self.keystore = self.load_data()
+        self.keystore : dict = self.load_data()
         self.codec = Fernet(self.superkey(bytes(password, 'UTF-8')))
 
     def get_password(self, service, user):
@@ -23,7 +23,8 @@ class FernetKeyring(KeyringBackend):
 
     def set_password(self, service, user, password):
         #print(f"Storing password for {user}@{service} in {self.keystore_path}")
-        if not 'service' in self.keystore:
+        if not service in self.keystore:
+            #print(f"Initializing {service} entry in keystore")
             self.keystore[service] = {}
         red_text = password
         black_text = self.codec.encrypt(bytes(red_text, 'UTF-8')).hex()

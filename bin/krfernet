@@ -5,6 +5,7 @@ import keyring
 from multicloud.backend.local.local_secret import LocalSecret
 from multicloud.autocontext import Context
 import argparse
+import getpass
 
 def open_keyring(password, keyring_file=None):
     if not keyring_file:
@@ -27,15 +28,17 @@ def open_keyring(password, keyring_file=None):
 if __name__ == "__main__":
     import json
     import os
-    password = os.getenv("KEYRING_PASSWORD", "hello.c")
+    default_password = os.getenv("KEYRING_PASSWORD", None)
     parser = argparse.ArgumentParser(description="Manage fernet keyring")
-    parser.add_argument("-p", "--password", help="master password", default=password)
+    parser.add_argument("-p", "--password", help="master password", default=default_password)
     parser.add_argument("-k", "--keyring-file", help="keyring file", default=None)
     parser.add_argument("cmd", help="command to execute (e.g. get, set)")
     parser.add_argument("secret_name", help="name of the secret")
     parser.add_argument("secret_value", help="JSON secret value", nargs='?', default=None)
     args = parser.parse_args()
 
+    if args.password is None:
+        args.password = getpass.getpass("Enter keyring password: ")
 
     ctx = open_keyring(args.password, args.keyring_file)
     secret = ctx.secret(args.secret_name)
