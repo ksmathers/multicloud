@@ -23,7 +23,8 @@ setup(name='multicloud',
             'multicloud_aws': 'multicloud_aws'
       },
       scripts=[
-          'bin/krfernet'
+          'bin/krfernet',
+	  'bin/copy-secrets',
       ],
       extras_require={
             'aws': ['boto3'],

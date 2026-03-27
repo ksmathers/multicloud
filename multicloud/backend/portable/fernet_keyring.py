@@ -7,8 +7,14 @@ import json
 import os
 
 class FernetKeyring(KeyringBackend):
-    def __init__(self, password, keystore_path="fernet-keyring.json"):
+    priority=8
+
+    def __init__(self, password=None, keystore_path="fernet-keyring.json"):
         #print("Initializing FernetKeyring with keystore:", keystore_path)
+        if password is None:
+            password = os.getenv("KEYRING_PASSWORD", None)
+            if password is None:
+                raise ValueError("Password for FernetKeyring not provided and KEYRING_PASSWORD environment variable not set")
         self.keystore_path = keystore_path
         self.keystore : dict = self.load_data()
         self.codec = Fernet(self.superkey(bytes(password, 'UTF-8')))
